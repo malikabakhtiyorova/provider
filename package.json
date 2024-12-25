@@ -21,8 +21,7 @@
     "lint": "eslint --ext=.js,.ts,.tsx --fix",
     "generate:openapi": "ts-node src/api-docs/openapi-writer.ts",
     "optic:lint": "optic lint src/api-docs/openapi.yaml",
-    "optic:diff": "optic diff src/api-docs/openapi.yaml --check --web --base main",
-    "generate:api-docs": "rm -rf docs && npx redocly build-docs src/api-docs/openapi.yml -o docs/api-docs.html"
+    "optic:diff": "optic diff src/api-docs/openapi.yaml --check --web --base main"
   },
   "devDependencies": {
     "@bahmutov/cy-api": "2.2.6",

@@ -31,9 +31,6 @@ jobs:
       - name: Optic lint OpenAPI spec ahead of other checks
         run: npm run optic:lint
 
-      - name: Generate api docs for Github Pages (html)
-        run: npm run generate:api-docs
-
       - name: Check if OpenAPI spec and/or API docs for Github Pages (html) have changed
         id: check_changes
         run: |
