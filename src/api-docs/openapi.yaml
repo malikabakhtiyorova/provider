@@ -1,0 +1,457 @@
+openapi: 3.1.0
+info:
+  title: Movies API
+  version: 9.0.0
+  description: API for managing movies
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://api.myapp.com
+    description: Production server
+components:
+  schemas:
+    CreateMovieResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Movie status
+          example: 200
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: id
+              example: 1
+            name:
+              type: string
+              description: name
+              example: Inception
+            year:
+              type: number
+              description: year
+              example: 2020
+            rating:
+              type: number
+              description: rating
+              example: 7.5
+          required:
+            - id
+            - name
+            - year
+            - rating
+        error:
+          type: string
+          description: Error message
+      required:
+        - status
+        - data
+    CreateMovieRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: MovieID
+          example: 1
+        name:
+          type: string
+          minLength: 1
+          description: Movie name
+          example: Inception
+        year:
+          type: integer
+          minimum: 1900
+          maximum: 2024
+          description: Movie year
+          example: 2020
+        rating:
+          type: number
+          description: Movie rating
+          example: 7.5
+      required:
+        - name
+        - year
+        - rating
+    GetMovieResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Movie status
+          example: 200
+        data:
+          anyOf:
+            - type: object
+              properties:
+                id:
+                  type: number
+                  description: Movieid
+                  example: 409
+                name:
+                  type: string
+                  description: Movie name
+                  example: Inception
+                year:
+                  type: number
+                  description: Movie year
+                  example: 2020
+                rating:
+                  type: number
+                  description: Movie rating
+                  example: 7.5
+              required:
+                - id
+                - name
+                - year
+                - rating
+            - type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: number
+                    description: Movieid
+                    example: 409
+                  name:
+                    type: string
+                    description: Movie name
+                    example: Inception
+                  year:
+                    type: number
+                    description: Movie year
+                    example: 2020
+                  rating:
+                    type: number
+                    description: Movie rating
+                    example: 7.5
+                required:
+                  - id
+                  - name
+                  - year
+                  - rating
+              description: movie details
+              example: []
+            - type: "null"
+        error:
+          type:
+            - string
+            - "null"
+          description: Error message
+      required:
+        - status
+        - data
+    UpdateMovieResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Movie status
+          example: 200
+        error:
+          type: string
+          description: error
+          example: Movie updated not successfully
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: id
+              example: 1
+            name:
+              type: string
+              description: name
+              example: Inception
+            year:
+              type: number
+              description: year
+              example: 2020
+            rating:
+              type: number
+              description: rating
+              example: 7.5
+          required:
+            - id
+            - name
+            - year
+            - rating
+      required:
+        - status
+        - data
+    UpdateMovieRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Movie ID
+          example: 1
+        name:
+          type: string
+          minLength: 1
+          description: Movie name
+          example: Inception
+        year:
+          type: integer
+          minimum: 1900
+          maximum: 2024
+          description: Movie year
+          example: 2020
+        rating:
+          type: number
+          description: Movie rating
+          example: 7.5
+      required:
+        - id
+        - name
+        - year
+        - rating
+    ConflictMovieResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Movie status
+          example: 409
+        error:
+          type: string
+          description: Error message
+          example: Movie exists
+      required:
+        - status
+        - error
+    MovieNotFoundResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: status code
+          example: 404
+        error:
+          type: string
+          description: Error message
+          example: Movie not found
+      required:
+        - status
+        - error
+    DeleteMovieResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: status code
+          example: 200
+        message:
+          type: string
+          description: Error message
+          example: string
+      required:
+        - status
+        - message
+  parameters: {}
+paths:
+  /:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Health check successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Server is running
+  /movies:
+    get:
+      summary: Get all movies or filter by name
+      description: Retrieve a list of all movies. Optionally, provide a query
+        parameter "name" to filter by a specific movie name.
+      parameters:
+        - name: name
+          in: query
+          description: Movie name
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of movies or a specific movie if the "name" query parameter is
+            provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMovieResponse"
+        "404":
+          description: Movie not found if the name is provided and does not match any movie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: status code
+                    example: 404
+                  error:
+                    type: string
+                    description: Error message
+                    example: Movie not found
+                required:
+                  - status
+                  - error
+    post:
+      summary: Create a new movie
+      description: Create a new movie in the system
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMovieRequest"
+      responses:
+        "200":
+          description: Movie created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateMovieResponse"
+        "400":
+          description: Invalid request body or validation error
+        "409":
+          description: Movie already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Movie status
+                    example: 409
+                  error:
+                    type: string
+                    description: Error message
+                    example: Movie exists
+                required:
+                  - status
+                  - error
+        "500":
+          description: Unexpected error occurred
+  /movies/{id}:
+    get:
+      summary: Get a movie by ID
+      description: Retrieve a single movie by its ID
+      parameters:
+        - &a1
+          name: id
+          in: path
+          description: Movie ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Movie found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMovieResponse"
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: status code
+                    example: 404
+                  error:
+                    type: string
+                    description: Error message
+                    example: Movie not found
+                required:
+                  - status
+                  - error
+    delete:
+      summary: Delete a movie by ID
+      parameters:
+        - *a1
+      responses:
+        "200":
+          description: Movie {id} has been deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: status code
+                    example: 200
+                  message:
+                    type: string
+                    description: Error message
+                    example: string
+                required:
+                  - status
+                  - message
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: status code
+                    example: 404
+                  error:
+                    type: string
+                    description: Error message
+                    example: Movie not found
+                required:
+                  - status
+                  - error
+    put:
+      summary: Update a movie by ID
+      description: Update the details of an existing movie by providing a movie ID
+      parameters:
+        - *a1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMovieRequest"
+      responses:
+        "200":
+          description: Movie updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateMovieResponse"
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: status code
+                    example: 404
+                  error:
+                    type: string
+                    description: Error message
+                    example: Movie not found
+                required:
+                  - status
+                  - error
+        "500":
+          description: Internal server error
+webhooks: {}
